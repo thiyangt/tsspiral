@@ -155,7 +155,7 @@ detect_tsspiral_frequency <- function(x) {
     return("annual")
   }
 
-  md <- median(d)
+  md <- stats::median(d)
 
   # Sub-daily data
   if (md < 1) {

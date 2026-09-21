@@ -1,0 +1,11 @@
+utils::globalVariables(c(
+  "weekday",
+  "week_in_month",
+  "calendar_x",
+  "calendar_y",
+  "theta_mid",
+  "theta_width",
+  "x",
+  "y",
+  "id"
+))

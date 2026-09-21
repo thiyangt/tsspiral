@@ -75,6 +75,7 @@
 #' @importFrom lubridate floor_date ceiling_date hour day wday
 #' @importFrom purrr map_dfr
 #' @importFrom tidyr crossing
+#' @importFrom rlang enquo
 #'
 #' @export
 calendar_hourly_polar <- function(data,

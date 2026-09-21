@@ -9,8 +9,10 @@ Authors@R:
       role = c("aut", "cre")
     )
 Description: Provides a ggplot2 geometry for visualising time series using spiral layouts, with each year represented as a separate ring.
-License: MIT + file LICENSE
+License: GPL (>= 3)
 Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports:
@@ -19,7 +21,8 @@ Imports:
     tibble,
     lubridate,
     purrr,
-    tidyr
+    tidyr,
+    rlang
 Suggests:
     testthat (>= 3.0.0),
     tsibble
