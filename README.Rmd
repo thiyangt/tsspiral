@@ -84,6 +84,36 @@ ggplot(
   theme_void()
 ```
 
+```{r}
+monthly_data <- data.frame(
+  date = seq.Date(
+    as.Date("2020-02-01"),
+    as.Date("2024-12-01"),
+    by = "month"
+  )
+)
+
+monthly_data$value <- rnorm(
+  nrow(monthly_data),
+  mean = 100,
+  sd = 20
+)
+
+ggplot(
+  monthly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
 
 ## Quarterly
 

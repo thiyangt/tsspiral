@@ -79,6 +79,38 @@ ggplot(
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" alt="" width="100%" />
 
+``` r
+monthly_data <- data.frame(
+  date = seq.Date(
+    as.Date("2020-02-01"),
+    as.Date("2024-12-01"),
+    by = "month"
+  )
+)
+
+monthly_data$value <- rnorm(
+  nrow(monthly_data),
+  mean = 100,
+  sd = 20
+)
+
+ggplot(
+  monthly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
+<img src="man/figures/README-unnamed-chunk-4-1.png" alt="" width="100%" />
+
 ## Quarterly
 
 ``` r
@@ -111,7 +143,7 @@ ggplot(
   theme_void()
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" alt="" width="100%" />
 
 ## Weekly
 
@@ -145,7 +177,7 @@ ggplot(
   theme_void()
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" alt="" width="100%" />
 
 ## Daily
 
@@ -184,7 +216,7 @@ dat$value <- 100 +
    theme_void()
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" alt="" width="100%" />
 
 ## Spiral Barchart
 
@@ -223,7 +255,7 @@ ggplot(
   theme_void()
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" alt="" width="100%" />
 
 ``` r
 library(ggplot2)
@@ -262,7 +294,7 @@ ggplot(
   theme_void()
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
 
 ## Missing Value Display Plot
 
@@ -329,7 +361,7 @@ ggplot(
   theme_void()
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" alt="" width="100%" />
 
 ## Calendar plot for hourly time series
 
@@ -370,7 +402,7 @@ calendar_hourly_polar(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" alt="" width="100%" />
 
 ``` r
 # February
@@ -382,4 +414,4 @@ calendar_hourly_polar(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-2.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-2.png" alt="" width="100%" />
