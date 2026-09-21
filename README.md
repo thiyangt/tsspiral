@@ -7,7 +7,7 @@
 
 <!-- badges: end -->
 
-The goal of tsspiral is to …
+The goal of tsspiral is to create spiral version of time series plots.
 
 ## Installation
 
@@ -185,3 +185,148 @@ dat$value <- 100 +
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" alt="" width="100%" />
+
+## Spiral Barchart
+
+``` r
+set.seed(123)
+
+dat <- data.frame(
+  date = seq.Date(
+    as.Date("2020-01-01"),
+    as.Date("2023-12-31"),
+    by = "day"
+  )
+)
+
+doy <- lubridate::yday(dat$date)
+
+dat$value <-
+  20 +
+  15 * sin(2 * pi * doy / 365) +
+  35 * exp(-((doy - 100) / 20)^2) +
+  25 * exp(-((doy - 280) / 30)^2) +
+  rnorm(nrow(dat), 0, 3)
+
+ggplot(
+  dat,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiralbar(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" alt="" width="100%" />
+
+``` r
+library(ggplot2)
+
+set.seed(123)
+
+dat <- data.frame(
+  date = seq.Date(
+    as.Date("2020-01-01"),
+    as.Date("2023-12-31"),
+    by = "day"
+  )
+)
+
+dat$value <- 100 +
+  30 * sin(
+    2 * pi * lubridate::yday(dat$date) / 365
+  ) +
+  rnorm(
+    nrow(dat),
+    sd = 8
+  )
+
+ggplot(
+  dat,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiralbar(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
+<img src="man/figures/README-unnamed-chunk-8-1.png" alt="" width="100%" />
+
+## Missing Value Display Plot
+
+``` r
+
+library(ggplot2)
+
+set.seed(123)
+
+# Generate a daily time series
+spiral_dat <- data.frame(
+  date = seq.Date(
+    from = as.Date("2020-01-01"),
+    to = as.Date("2023-12-31"),
+    by = "day"
+  )
+)
+
+# Generate a seasonal time series
+spiral_dat$value <-
+  100 +
+  25 * sin(
+    2 * pi * lubridate::yday(spiral_dat$date) / 365
+  ) +
+  rnorm(
+    nrow(spiral_dat),
+    sd = 5
+  )
+
+# Create missing periods
+missing_dates <- c(
+  seq.Date(
+    as.Date("2020-03-01"),
+    as.Date("2020-03-20"),
+    by = "day"
+  ),
+  seq.Date(
+    as.Date("2021-07-10"),
+    as.Date("2021-08-05"),
+    by = "day"
+  ),
+  seq.Date(
+    as.Date("2023-01-15"),
+    as.Date("2023-02-10"),
+    by = "day"
+  )
+)
+
+# Remove missing observations
+spiral_dat <- spiral_dat[
+  !spiral_dat$date %in% missing_dates,
+]
+
+# Plot missingness
+ggplot(
+  spiral_dat,
+  aes(x = date)
+) +
+  geom_tsspiralmiss(
+    ring_spacing = 2,
+    observed_colour = "grey85",
+    missing_colour = "black"
+  ) +
+  theme_void()
+```
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
