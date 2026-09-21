@@ -1,10 +1,85 @@
-library(tidyverse)
-library(lubridate)
-
-# ---------------------------------------------------------
-# Calendar of hourly polar bar charts
-# ---------------------------------------------------------
-
+#' Calendar of Hourly Polar Bar Charts
+#'
+#' Creates a monthly calendar visualization in which each calendar day
+#' contains a 24-hour polar bar chart. Each bar represents one hour of
+#' the day, with the angular position corresponding to the hour and the
+#' bar length and colour representing the observed value.
+#'
+#' Missing hourly observations are retained in the calendar but are not
+#' drawn as bars. The calendar is arranged from Monday to Sunday, with
+#' each day positioned according to its calendar date.
+#'
+#' @param data A data frame containing the hourly observations.
+#' @param datetime A date-time column containing the observation times.
+#' @param value A numeric column containing the values to be visualized.
+#' @param month A date or character value specifying the month to plot.
+#'   For example, \code{"2026-01-01"}. If \code{NULL}, the month containing
+#'   the earliest observation is used.
+#' @param radius Numeric. Maximum radius of the hourly bars within each
+#'   calendar cell. Defaults to \code{0.35}.
+#' @param bar_width Numeric between 0 and 1. Controls the angular width
+#'   of each hourly bar relative to the 24-hour sector. Defaults to
+#'   \code{0.85}.
+#' @param cell_width Numeric. Width of each calendar cell. Defaults to
+#'   \code{1}.
+#' @param cell_height Numeric. Height of each calendar cell. Defaults to
+#'   \code{1}.
+#'
+#' @return A ggplot object containing the calendar of hourly polar bar
+#'   charts.
+#'
+#' @details
+#' Each day is represented by a separate polar bar chart containing up to
+#' 24 bars. Hour 0 starts at the top of the circle and the hours proceed
+#' clockwise through hour 23.
+#'
+#' The bar length is scaled according to the range of the observed values
+#' in the selected month, while colour represents the original value.
+#' Missing hourly observations are left blank.
+#'
+#' The function is particularly useful for examining intraday patterns
+#' while retaining the context of the calendar. For example, daily
+#' temperature, air quality, electricity demand, traffic, or other
+#' regularly recorded hourly measurements can be displayed.
+#'
+#' @examples
+#' set.seed(123)
+#'
+#' hourly_data <- tibble::tibble(
+#'   datetime = seq(
+#'     from = as.POSIXct("2026-01-01 00:00"),
+#'     to = as.POSIXct("2026-01-31 23:00"),
+#'     by = "hour"
+#'   )
+#' ) |>
+#'   dplyr::mutate(
+#'     hour = lubridate::hour(datetime),
+#'     day = lubridate::day(datetime),
+#'     temperature =
+#'       25 +
+#'       4 * sin(2 * pi * hour / 24) +
+#'       0.05 * day +
+#'       rnorm(dplyr::n(), 0, 0.8)
+#'   )
+#'
+#' calendar_hourly_polar(
+#'   hourly_data,
+#'   datetime,
+#'   temperature,
+#'   month = "2026-01-01"
+#' )
+#'
+#' @importFrom dplyr transmute mutate filter select left_join
+#'   distinct
+#' @importFrom ggplot2 ggplot geom_tile geom_polygon geom_text
+#'   scale_x_continuous scale_y_continuous scale_fill_viridis_c
+#'   coord_equal labs theme_minimal theme element_blank
+#' @importFrom lubridate floor_date ceiling_date as_date hour day wday
+#' @importFrom purrr map_dfr
+#' @importFrom tibble tibble
+#' @importFrom tidyr crossing
+#'
+#' @export
 calendar_hourly_polar <- function(data, datetime, value,
                                   month = NULL,
                                   radius = 0.35,
