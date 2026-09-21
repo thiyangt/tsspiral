@@ -330,3 +330,56 @@ ggplot(
 ```
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
+
+## Calendar plot for hourly time series
+
+``` r
+# =========================================================
+# Example: Two months of hourly data
+# =========================================================
+
+set.seed(123)
+
+hourly_data <- tibble::tibble(
+  datetime = seq(
+    from = as.POSIXct("2026-01-01 00:00"),
+    to   = as.POSIXct("2026-02-28 23:00"),
+    by   = "hour"
+  )
+) |>
+  dplyr::mutate(
+    hour = lubridate::hour(datetime),
+    day = lubridate::day(datetime),
+
+    temperature =
+      25 +
+      4 * sin(2 * pi * hour / 24) +
+      0.05 * day +
+      stats::rnorm(
+        length(datetime),
+        0,
+        0.8
+      )
+  )
+# January
+calendar_hourly_polar(
+  hourly_data,
+  datetime,
+  temperature,
+  month = "2026-01-01"
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-10-1.png" alt="" width="100%" />
+
+``` r
+# February
+calendar_hourly_polar(
+  hourly_data,
+  datetime,
+  temperature,
+  month = "2026-02-01"
+)
+```
+
+<img src="man/figures/README-unnamed-chunk-10-2.png" alt="" width="100%" />

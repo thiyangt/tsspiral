@@ -25,8 +25,7 @@
 #' @param cell_height Numeric. Height of each calendar cell. Defaults to
 #'   \code{1}.
 #'
-#' @return A ggplot object containing the calendar of hourly polar bar
-#'   charts.
+#' @return A ggplot object containing a calendar of hourly polar bar charts.
 #'
 #' @details
 #' Each day is represented by a separate polar bar chart containing up to
@@ -37,10 +36,10 @@
 #' in the selected month, while colour represents the original value.
 #' Missing hourly observations are left blank.
 #'
-#' The function is particularly useful for examining intraday patterns
-#' while retaining the context of the calendar. For example, daily
-#' temperature, air quality, electricity demand, traffic, or other
-#' regularly recorded hourly measurements can be displayed.
+#' The function is useful for examining intraday patterns while retaining
+#' the context of the calendar. For example, daily temperature, air quality,
+#' electricity demand, traffic, or other regularly recorded hourly
+#' measurements can be displayed.
 #'
 #' @examples
 #' set.seed(123)
@@ -59,7 +58,7 @@
 #'       25 +
 #'       4 * sin(2 * pi * hour / 24) +
 #'       0.05 * day +
-#'       rnorm(dplyr::n(), 0, 0.8)
+#'       stats::rnorm(length(datetime), 0, 0.8)
 #'   )
 #'
 #' calendar_hourly_polar(
@@ -70,38 +69,38 @@
 #' )
 #'
 #' @importFrom dplyr transmute mutate filter select left_join
-#'   distinct
 #' @importFrom ggplot2 ggplot geom_tile geom_polygon geom_text
 #'   scale_x_continuous scale_y_continuous scale_fill_viridis_c
 #'   coord_equal labs theme_minimal theme element_blank
-#' @importFrom lubridate floor_date ceiling_date as_date hour day wday
+#' @importFrom lubridate floor_date ceiling_date hour day wday
 #' @importFrom purrr map_dfr
-#' @importFrom tibble tibble
 #' @importFrom tidyr crossing
 #'
 #' @export
-calendar_hourly_polar <- function(data, datetime, value,
+calendar_hourly_polar <- function(data,
+                                  datetime,
+                                  value,
                                   month = NULL,
                                   radius = 0.35,
                                   bar_width = 0.85,
                                   cell_width = 1,
                                   cell_height = 1) {
 
-  datetime <- enquo(datetime)
-  value    <- enquo(value)
+  datetime <- rlang::enquo(datetime)
+  value <- rlang::enquo(value)
 
   # -------------------------------------------------------
   # Prepare data
   # -------------------------------------------------------
 
   dat <- data |>
-    transmute(
+    dplyr::transmute(
       datetime = !!datetime,
       value = !!value
     ) |>
-    mutate(
+    dplyr::mutate(
       date = as.Date(datetime),
-      hour = hour(datetime)
+      hour = lubridate::hour(datetime)
     )
 
   # -------------------------------------------------------
@@ -110,63 +109,80 @@ calendar_hourly_polar <- function(data, datetime, value,
 
   if (!is.null(month)) {
 
-    month_start <- floor_date(as.Date(month), "month")
+    month_start <- lubridate::floor_date(
+      as.Date(month),
+      "month"
+    )
 
     dat <- dat |>
-      filter(
-        floor_date(date, "month") == month_start
+      dplyr::filter(
+        lubridate::floor_date(date, "month") == month_start
       )
 
   } else {
 
-    month_start <- floor_date(min(dat$date), "month")
+    if (nrow(dat) == 0) {
+      stop("No observations available.")
+    }
+
+    month_start <- lubridate::floor_date(
+      min(dat$date),
+      "month"
+    )
   }
 
   # -------------------------------------------------------
   # Calendar structure
   # -------------------------------------------------------
 
-  month_end <- ceiling_date(month_start, "month") - days(1)
+  month_end <- lubridate::ceiling_date(
+    month_start,
+    "month"
+  ) - lubridate::days(1)
 
-  calendar_days <- tibble(
+  calendar_days <- tibble::tibble(
     date = seq(
       month_start,
       month_end,
       by = "day"
     )
   ) |>
-    mutate(
+    dplyr::mutate(
 
-      weekday = wday(
+      weekday = lubridate::wday(
         date,
         week_start = 1
       ),
 
       week_in_month =
-        (day(date) +
-           wday(month_start, week_start = 1) -
-           2) %/% 7 + 1,
+        (
+          lubridate::day(date) +
+            lubridate::wday(
+              month_start,
+              week_start = 1
+            ) -
+            2
+        ) %/% 7 + 1,
 
       calendar_x = weekday,
       calendar_y = -week_in_month
     )
-
 
   # -------------------------------------------------------
   # Complete every day to 24 hours
   # -------------------------------------------------------
 
   dat <- calendar_days |>
-    select(date) |>
-    crossing(hour = 0:23) |>
-    left_join(
+    dplyr::select(date) |>
+    tidyr::crossing(hour = 0:23) |>
+    dplyr::left_join(
       dat |>
-        select(date, hour, value),
+        dplyr::select(date, hour, value),
       by = c("date", "hour")
     ) |>
-    left_join(
+    dplyr::left_join(
       calendar_days |>
-        select(
+        dplyr::select(
           date,
           calendar_x,
           calendar_y
@@ -174,11 +190,20 @@ calendar_hourly_polar <- function(data, datetime, value,
       by = "date"
     )
 
+  # -------------------------------------------------------
+  # Check value
+  # -------------------------------------------------------
+
+  if (!is.numeric(dat$value)) {
+    stop("`value` must be numeric.")
+  }
+
+  if (all(is.na(dat$value))) {
+    stop("No non-missing values are available for the selected month.")
+  }
 
   # -------------------------------------------------------
-  # Scale values
-  #
-  # The bar length is scaled between 0 and radius.
+  # Scale values to bar length
   # -------------------------------------------------------
 
   value_range <- range(
@@ -189,14 +214,14 @@ calendar_hourly_polar <- function(data, datetime, value,
   if (diff(value_range) == 0) {
 
     dat <- dat |>
-      mutate(
+      dplyr::mutate(
         bar_radius = radius / 2
       )
 
   } else {
 
     dat <- dat |>
-      mutate(
+      dplyr::mutate(
         bar_radius =
           radius *
           (value - value_range[1]) /
@@ -204,15 +229,13 @@ calendar_hourly_polar <- function(data, datetime, value,
       )
   }
 
-
   # -------------------------------------------------------
-  # Create polar bars
+  # Angular position of each hour
   # -------------------------------------------------------
-
-  # Each hour occupies 1/24 of the circle.
 
   dat <- dat |>
-    mutate(
+    dplyr::mutate(
+
       theta_mid =
         2 * pi * hour / 24 - pi / 2,
 
@@ -226,9 +249,8 @@ calendar_hourly_polar <- function(data, datetime, value,
         theta_mid + theta_width / 2
     )
 
-
   # -------------------------------------------------------
-  # Convert each polar bar to a polygon
+  # Function to create one polar bar
   # -------------------------------------------------------
 
   make_bar <- function(
@@ -246,7 +268,7 @@ calendar_hourly_polar <- function(data, datetime, value,
       length.out = 10
     )
 
-    tibble(
+    tibble::tibble(
 
       id = id,
 
@@ -264,14 +286,16 @@ calendar_hourly_polar <- function(data, datetime, value,
     )
   }
 
+  # -------------------------------------------------------
+  # Convert polar bars to polygons
+  # -------------------------------------------------------
 
-  polar_bars <- map_dfr(
+  polar_bars <- purrr::map_dfr(
     seq_len(nrow(dat)),
     function(i) {
 
-      # Missing observations have no visible bar
+      # Do not draw missing observations
       if (is.na(dat$bar_radius[i])) {
-
         return(NULL)
       }
 
@@ -283,7 +307,7 @@ calendar_hourly_polar <- function(data, datetime, value,
         height = dat$bar_radius[i],
         id = i
       ) |>
-        mutate(
+        dplyr::mutate(
           date = dat$date[i],
           hour = dat$hour[i],
           value = dat$value[i]
@@ -291,17 +315,16 @@ calendar_hourly_polar <- function(data, datetime, value,
     }
   )
 
-
   # -------------------------------------------------------
   # Plot
   # -------------------------------------------------------
 
-  ggplot() +
+  ggplot2::ggplot() +
 
     # Calendar cells
-    geom_tile(
+    ggplot2::geom_tile(
       data = calendar_days,
-      aes(
+      ggplot2::aes(
         x = calendar_x,
         y = calendar_y
       ),
@@ -312,10 +335,10 @@ calendar_hourly_polar <- function(data, datetime, value,
       height = cell_height
     ) +
 
-    # 24 hourly polar bars
-    geom_polygon(
+    # Hourly polar bars
+    ggplot2::geom_polygon(
       data = polar_bars,
-      aes(
+      ggplot2::aes(
         x = x,
         y = y,
         group = id,
@@ -326,12 +349,12 @@ calendar_hourly_polar <- function(data, datetime, value,
     ) +
 
     # Day number
-    geom_text(
+    ggplot2::geom_text(
       data = calendar_days,
-      aes(
+      ggplot2::aes(
         x = calendar_x - 0.40,
         y = calendar_y + 0.40,
-        label = day(date)
+        label = lubridate::day(date)
       ),
       hjust = 0,
       vjust = 1,
@@ -339,32 +362,34 @@ calendar_hourly_polar <- function(data, datetime, value,
     ) +
 
     # Weekdays
-    scale_x_continuous(
+    ggplot2::scale_x_continuous(
       breaks = 1:7,
       labels = c(
-        "Mon", "Tue", "Wed", "Thu",
-        "Fri", "Sat", "Sun"
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
       ),
-      limits = c(
-        0.4,
-        7.6
-      ),
+      limits = c(0.4, 7.6),
       expand = c(0, 0)
     ) +
 
-    scale_y_continuous(
+    ggplot2::scale_y_continuous(
       breaks = -(1:6),
       labels = NULL,
       expand = c(0, 0)
     ) +
 
-    scale_fill_viridis_c(
+    ggplot2::scale_fill_viridis_c(
       na.value = "black"
     ) +
 
-    coord_equal() +
+    ggplot2::coord_equal() +
 
-    labs(
+    ggplot2::labs(
       x = NULL,
       y = NULL,
       fill = "Value",
@@ -374,58 +399,12 @@ calendar_hourly_polar <- function(data, datetime, value,
       )
     ) +
 
-    theme_minimal() +
+    ggplot2::theme_minimal() +
 
-    theme(
-      panel.grid = element_blank(),
-      axis.text.y = element_blank(),
-      axis.ticks = element_blank(),
-      panel.border = element_blank()
+    ggplot2::theme(
+      panel.grid = ggplot2::element_blank(),
+      axis.text.y = ggplot2::element_blank(),
+      axis.ticks = ggplot2::element_blank(),
+      panel.border = ggplot2::element_blank()
     )
 }
-
-
-# =========================================================
-# Example
-# =========================================================
-
-set.seed(123)
-
-hourly_data <- tibble(
-
-  datetime = seq(
-    from = as.POSIXct(
-      "2026-01-01 00:00"
-    ),
-    to = as.POSIXct(
-      "2026-01-31 23:00"
-    ),
-    by = "hour"
-  )
-) |>
-  mutate(
-
-    hour = hour(datetime),
-
-    day = day(datetime),
-
-    temperature =
-      25 +
-      4 * sin(
-        2 * pi * hour / 24
-      ) +
-      0.05 * day +
-      rnorm(
-        n(),
-        0,
-        0.8
-      )
-  )
-
-
-calendar_hourly_polar(
-  hourly_data,
-  datetime,
-  temperature,
-  month = "2026-01-01"
-)
