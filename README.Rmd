@@ -1,0 +1,56 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# tsspiral
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of tsspiral is to ...
+
+## Installation
+
+You can install the development version of tsspiral from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("thiyangt/tsspiralplot")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library(tsspiral)
+library(ggplot2)
+library(tsibble)
+
+dat <- tibble::tibble(
+  date = seq.Date( as.Date("2023-01-01"), as.Date("2025-12-31"), by = "day"), 
+  value = rnorm(1096, 300, 30)) |>
+tsibble::as_tsibble(index = date)
+
+ggplot(dat, aes( x = date, y = value, fill = value)) +
+  geom_tsspiral()
+```
+
+# Control the spacing between yearly rings
+
+```{r}
+ggplot(dat, aes(x = date, y = value, fill = value)) +
+geom_tsspiral(ring_spacing = 5)
+```
+

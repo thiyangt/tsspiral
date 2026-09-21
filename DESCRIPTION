@@ -1,0 +1,21 @@
+Package: tsspiral
+Title: Spiral Visualisation for Time Series
+Version: 0.1.0
+Authors@R:
+    person(
+      "Thiyanga S.",
+      "Talagala",
+      email = "ttalagala@sjp.ac.lk",
+      role = c("aut", "cre")
+    )
+Description: Provides a ggplot2 geometry for visualising time series using spiral layouts, with each year represented as a separate ring.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports:
+    ggplot2
+Suggests:
+    testthat (>= 3.0.0),
+    tsibble
+Config/testthat/edition: 3
