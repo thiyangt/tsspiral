@@ -19,39 +19,169 @@ You can install the development version of tsspiral from
 pak::pak("thiyangt/tsspiralplot")
 ```
 
-## Example
+## Applications
 
-This is a basic example which shows you how to solve a common problem:
+### Monthly data
 
 ``` r
 library(tsspiral)
 library(ggplot2)
-library(tsibble)
-#> Registered S3 method overwritten by 'tsibble':
-#>   method               from 
-#>   as_tibble.grouped_df dplyr
-#> 
-#> Attaching package: 'tsibble'
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, union
+library(viridis)
+#> Loading required package: viridisLite
 
-dat <- tibble::tibble(
-  date = seq.Date( as.Date("2023-01-01"), as.Date("2025-12-31"), by = "day"), 
-  value = rnorm(1096, 300, 30)) |>
-tsibble::as_tsibble(index = date)
+monthly_data <- data.frame(
+  date = seq.Date(
+    as.Date("2020-01-01"),
+    as.Date("2024-12-01"),
+    by = "month"
+  )
+)
 
-ggplot(dat, aes( x = date, y = value, fill = value)) +
-  geom_tsspiral()
-```
+monthly_data$value <- rnorm(
+  nrow(monthly_data),
+  mean = 100,
+  sd = 20
+)
 
-<img src="man/figures/README-example-1.png" alt="" width="100%" />
-
-# Control the spacing between yearly rings
-
-``` r
-ggplot(dat, aes(x = date, y = value, fill = value)) +
-geom_tsspiral(ring_spacing = 5)
+ggplot(
+  monthly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" alt="" width="100%" />
+
+``` r
+
+ggplot(
+  monthly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 1
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" alt="" width="100%" />
+
+## Quarterly
+
+``` r
+quarterly_data <- data.frame(
+  date = seq.Date(
+    as.Date("2020-01-01"),
+    as.Date("2025-10-01"),
+    by = "quarter"
+  )
+)
+
+quarterly_data$value <- rnorm(
+  nrow(quarterly_data),
+  100,
+  20
+)
+
+ggplot(
+  quarterly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
+<img src="man/figures/README-unnamed-chunk-4-1.png" alt="" width="100%" />
+
+## Weekly
+
+``` r
+weekly_data <- data.frame(
+  date = seq.Date(
+    as.Date("2023-01-01"),
+    as.Date("2025-12-28"),
+    by = "week"
+  )
+)
+
+weekly_data$value <- rnorm(
+  nrow(weekly_data),
+  100,
+  20
+)
+
+ggplot(
+  weekly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" alt="" width="100%" />
+
+## Daily
+
+``` r
+set.seed(123)
+
+dat <- data.frame(
+  date = seq.Date(
+   as.Date("2020-01-01"),
+   as.Date("2023-12-31"),
+    by = "day"
+   )
+ )
+
+dat$value <- 100 +
+ 20 * sin(
+    2 * pi *
+       lubridate::yday(dat$date) / 365
+   ) +
+  rnorm(
+     nrow(dat),
+     sd = 5
+   )
+
+ ggplot(
+  dat,
+  aes(
+    x = date,
+    y = value,
+   fill = value
+  ) ) +
+  geom_tsspiral(
+    ring_spacing = 2
+   ) +
+   scale_fill_viridis_c() +
+   theme_void()
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" alt="" width="100%" />

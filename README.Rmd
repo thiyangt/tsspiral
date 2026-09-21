@@ -29,28 +29,161 @@ You can install the development version of tsspiral from [GitHub](https://github
 pak::pak("thiyangt/tsspiralplot")
 ```
 
-## Example
+## Applications
 
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-library(tsspiral)
-library(ggplot2)
-library(tsibble)
-
-dat <- tibble::tibble(
-  date = seq.Date( as.Date("2023-01-01"), as.Date("2025-12-31"), by = "day"), 
-  value = rnorm(1096, 300, 30)) |>
-tsibble::as_tsibble(index = date)
-
-ggplot(dat, aes( x = date, y = value, fill = value)) +
-  geom_tsspiral()
-```
-
-# Control the spacing between yearly rings
+### Monthly data
 
 ```{r}
-ggplot(dat, aes(x = date, y = value, fill = value)) +
-geom_tsspiral(ring_spacing = 5)
+library(tsspiral)
+library(ggplot2)
+library(viridis)
+
+monthly_data <- data.frame(
+  date = seq.Date(
+    as.Date("2020-01-01"),
+    as.Date("2024-12-01"),
+    by = "month"
+  )
+)
+
+monthly_data$value <- rnorm(
+  nrow(monthly_data),
+  mean = 100,
+  sd = 20
+)
+
+ggplot(
+  monthly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
 ```
 
+```{r}
+
+ggplot(
+  monthly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 1
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
+
+## Quarterly
+
+```{r}
+quarterly_data <- data.frame(
+  date = seq.Date(
+    as.Date("2020-01-01"),
+    as.Date("2025-10-01"),
+    by = "quarter"
+  )
+)
+
+quarterly_data$value <- rnorm(
+  nrow(quarterly_data),
+  100,
+  20
+)
+
+ggplot(
+  quarterly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
+## Weekly
+
+```{r}
+weekly_data <- data.frame(
+  date = seq.Date(
+    as.Date("2023-01-01"),
+    as.Date("2025-12-28"),
+    by = "week"
+  )
+)
+
+weekly_data$value <- rnorm(
+  nrow(weekly_data),
+  100,
+  20
+)
+
+ggplot(
+  weekly_data,
+  aes(
+    x = date,
+    y = value,
+    fill = value
+  )
+) +
+  geom_tsspiral(
+    ring_spacing = 2
+  ) +
+  scale_fill_viridis_c() +
+  theme_void()
+```
+
+
+## Daily
+
+```{r}
+set.seed(123)
+
+dat <- data.frame(
+  date = seq.Date(
+   as.Date("2020-01-01"),
+   as.Date("2023-12-31"),
+    by = "day"
+   )
+ )
+
+dat$value <- 100 +
+ 20 * sin(
+    2 * pi *
+       lubridate::yday(dat$date) / 365
+   ) +
+  rnorm(
+     nrow(dat),
+     sd = 5
+   )
+
+ ggplot(
+  dat,
+  aes(
+    x = date,
+    y = value,
+   fill = value
+  ) ) +
+  geom_tsspiral(
+    ring_spacing = 2
+   ) +
+   scale_fill_viridis_c() +
+   theme_void()
+
+```

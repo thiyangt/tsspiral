@@ -7,7 +7,7 @@
 geom_tsspiral(
   mapping = NULL,
   data = NULL,
-  stat = "identity",
+  stat = StatTSSpiral,
   position = "identity",
   na.rm = FALSE,
   ring_spacing = 1,
@@ -15,76 +15,95 @@ geom_tsspiral(
 )
 }
 \arguments{
-\item{mapping}{Set of aesthetic mappings created by \code{\link[ggplot2:aes]{ggplot2::aes()}}.
-The \code{x} aesthetic should contain the time index, \code{y} should contain
-the observed value, and \code{fill} controls the colour of observations.}
+\item{mapping}{Set of aesthetic mappings created by
+\code{\link[ggplot2:aes]{ggplot2::aes()}}.}
 
-\item{data}{A data frame containing the time series.}
+\item{data}{A data frame, tibble, or tsibble containing the
+time-series data.}
 
-\item{stat}{The statistical transformation to use. Defaults to
-\code{"identity"}.}
+\item{stat}{Statistical transformation used by the layer.
+Defaults to \code{StatTSSpiral}.}
 
 \item{position}{Position adjustment. Defaults to \code{"identity"}.}
 
-\item{na.rm}{Logical indicating whether missing values should be
-removed. Defaults to \code{FALSE}.}
+\item{na.rm}{Logical. Should missing values be removed silently?}
 
-\item{ring_spacing}{Numeric value controlling the spacing between
-consecutive yearly rings. Defaults to \code{1}.}
+\item{ring_spacing}{Numeric value controlling the distance between
+yearly rings.}
 
 \item{...}{Other arguments passed to \code{\link[ggplot2:layer]{ggplot2::layer()}}.}
 }
 \value{
-A ggplot2 layer that draws the time series as a spiral.
+A ggplot2 layer.
 }
 \description{
-\code{geom_tsspiral()} provides a ggplot2 geometry for visualising
-time series in a spiral layout. Observations from different
-years are arranged as concentric rings, allowing seasonal patterns
-to be compared across years.
+Create a spiral time-series plot using a fixed 365-day calendar.
 }
 \details{
-Creates a spiral representation of a time series using ggplot2.
-Each year is represented by a separate ring, while the position
-within each ring represents the day/week/month etc of the year.
+\code{geom_tsspiral()} displays each year of a time series as a radial
+ring. The angular position represents the day of the year. The
+spiral always contains 365 angular divisions.
 
-The date supplied through the \code{x} aesthetic determines the position
-of each observation in the spiral:
+The spiral starts at 12 o'clock on January 1 and proceeds
+clockwise through the year.
+
+The input frequency is detected automatically. Daily observations
+are used directly. Weekly, monthly, quarterly, and annual
+observations are expanded to daily observations before plotting.
+
+Calendar labels are displayed only around the outermost ring:
 
 \itemize{
-\item The year determines the radial position.
-\item The day/week/month/quarter/hour etc. of the year determines the angular position.
-\item The \code{fill} aesthetic determines the colour of the observation.
+\item daily data: month names,
+\item monthly data: month names,
+\item quarterly data: quarter names,
+\item weekly data: week numbers,
+\item annual data: month names.
 }
 
-Missing observations are not drawn, allowing gaps in the time series
-to remain visible.
+The spiral uses a fixed 365-day calendar. January 1 starts at
+12 o'clock and the calendar proceeds clockwise.
 
-Year labels are displayed on the corresponding rings.
+For day \code{d}, the angular position is
+
+\deqn{
+\theta_d =
+\frac{\pi}{2}
+-
+\frac{2\pi(d-1)}{365}.
+}
+
+Consequently, January 1 is positioned at 12 o'clock and later
+days move clockwise around the spiral.
+
+Leap years do not create a 366th angular division. February 29 is
+mapped to the February 28 position and the days after February 29
+are shifted by one day.
+
+Monthly, quarterly, weekly, and annual observations are expanded
+to their corresponding daily intervals. Consequently, a monthly
+observation fills the complete angular region corresponding to
+that month rather than appearing as a thin radial slice.
 }
 \examples{
-library(ggplot2)
+\dontrun{
 
+library(ggplot2)
+library(viridis)
+
+# Daily data
 dat <- data.frame(
   date = seq.Date(
-    as.Date("2023-01-01"),
-    as.Date("2025-12-31"),
+    as.Date("2020-01-01"),
+    as.Date("2023-12-31"),
     by = "day"
-  ),
-  value = rnorm(1096, 300, 30)
+  )
 )
 
-ggplot(
-  dat,
-  aes(
-    x = date,
-    y = value,
-    fill = value
-  )
-) +
-  geom_tsspiral()
+dat$value <- sin(
+  2 * pi * as.numeric(format(dat$date, "\%j")) / 365
+) + rnorm(nrow(dat), sd = 0.2)
 
-# Increase the spacing between yearly rings
 ggplot(
   dat,
   aes(
@@ -93,9 +112,10 @@ ggplot(
     fill = value
   )
 ) +
-  geom_tsspiral(ring_spacing = 2)
+  geom_tsspiral(ring_spacing = 2) +
+  scale_fill_viridis_c() +
+  theme_void()
 
 }
-\seealso{
-\code{\link[ggplot2:layer]{ggplot2::layer()}}
+
 }

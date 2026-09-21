@@ -1,8 +1,6 @@
-
 # ============================================================
 # geom_tsspiral.R
 # ============================================================
-
 #' Spiral Time-Series Geometry
 #'
 #' Create a spiral time-series plot using a fixed 365-day calendar.
@@ -10,6 +8,9 @@
 #' `geom_tsspiral()` displays each year of a time series as a radial
 #' ring. The angular position represents the day of the year. The
 #' spiral always contains 365 angular divisions.
+#'
+#' The spiral starts at 12 o'clock on January 1 and proceeds
+#' clockwise through the year.
 #'
 #' The input frequency is detected automatically. Daily observations
 #' are used directly. Weekly, monthly, quarterly, and annual
@@ -41,12 +42,20 @@
 #'
 #' @details
 #'
-#' The spiral uses a fixed 365-day calendar. For day `d`, the angular
-#' position is
+#' The spiral uses a fixed 365-day calendar. January 1 starts at
+#' 12 o'clock and the calendar proceeds clockwise.
+#'
+#' For day `d`, the angular position is
 #'
 #' \deqn{
-#' \theta_d = 2\pi(d-1)/365.
+#' \theta_d =
+#' \frac{\pi}{2}
+#' -
+#' \frac{2\pi(d-1)}{365}.
 #' }
+#'
+#' Consequently, January 1 is positioned at 12 o'clock and later
+#' days move clockwise around the spiral.
 #'
 #' Leap years do not create a 366th angular division. February 29 is
 #' mapped to the February 28 position and the days after February 29
@@ -148,6 +157,7 @@ detect_tsspiral_frequency <- function(x) {
 
   md <- median(d)
 
+  # Sub-daily data
   if (md < 1) {
 
     warning(
@@ -157,25 +167,29 @@ detect_tsspiral_frequency <- function(x) {
     )
 
     return("high")
-
   }
 
+  # Daily
   if (md <= 1.5) {
     return("daily")
   }
 
+  # Weekly
   if (md >= 5 && md <= 9) {
     return("weekly")
   }
 
+  # Monthly
   if (md >= 25 && md <= 35) {
     return("monthly")
   }
 
+  # Quarterly
   if (md >= 75 && md <= 105) {
     return("quarterly")
   }
 
+  # Annual
   if (md >= 330) {
     return("annual")
   }
@@ -211,17 +225,16 @@ expand_tsspiral_daily <- function(
   data$x <- as.Date(data$x)
 
   # ----------------------------------------------------------
-  # Daily
+  # Daily and high-frequency data
   # ----------------------------------------------------------
 
   if (frequency %in% c("daily", "high")) {
-
     return(data)
   }
 
 
   # ----------------------------------------------------------
-  # Weekly
+  # Weekly data
   # ----------------------------------------------------------
 
   if (frequency == "weekly") {
@@ -234,14 +247,8 @@ expand_tsspiral_daily <- function(
 
         start <- x[i]
 
-        if (i < length(x)) {
-
-          end <- x[i + 1] - 1
-
-        } else {
-
-          end <- start + 6
-        }
+        # Each weekly observation represents seven days.
+        end <- start + 6
 
         dates <- seq.Date(
           start,
@@ -260,9 +267,7 @@ expand_tsspiral_daily <- function(
           ,
           drop = FALSE
         ] |>
-          transform(
-            x = dates
-          )
+          transform(x = dates)
       }
     )
 
@@ -276,7 +281,7 @@ expand_tsspiral_daily <- function(
 
 
   # ----------------------------------------------------------
-  # Monthly
+  # Monthly data
   # ----------------------------------------------------------
 
   if (frequency == "monthly") {
@@ -317,9 +322,7 @@ expand_tsspiral_daily <- function(
           ,
           drop = FALSE
         ] |>
-          transform(
-            x = dates
-          )
+          transform(x = dates)
       }
     )
 
@@ -333,7 +336,7 @@ expand_tsspiral_daily <- function(
 
 
   # ----------------------------------------------------------
-  # Quarterly
+  # Quarterly data
   # ----------------------------------------------------------
 
   if (frequency == "quarterly") {
@@ -374,9 +377,7 @@ expand_tsspiral_daily <- function(
           ,
           drop = FALSE
         ] |>
-          transform(
-            x = dates
-          )
+          transform(x = dates)
       }
     )
 
@@ -390,7 +391,7 @@ expand_tsspiral_daily <- function(
 
 
   # ----------------------------------------------------------
-  # Annual
+  # Annual data
   # ----------------------------------------------------------
 
   if (frequency == "annual") {
@@ -436,9 +437,7 @@ expand_tsspiral_daily <- function(
           ,
           drop = FALSE
         ] |>
-          transform(
-            x = dates
-          )
+          transform(x = dates)
       }
     )
 
@@ -480,7 +479,6 @@ tsspiral_day <- function(x) {
   leap <- lubridate::leap_year(x)
 
   spiral_day <- doy
-
 
   # ----------------------------------------------------------
   # February 29
@@ -690,7 +688,7 @@ StatTSSpiral <- ggplot2::ggproto(
 
 
     # --------------------------------------------------------
-    # Expand to daily
+    # Expand to daily resolution
     # --------------------------------------------------------
 
     daily <-
@@ -739,10 +737,14 @@ StatTSSpiral <- ggplot2::ggproto(
 
 
     # --------------------------------------------------------
-    # Angular boundaries
+    # Clockwise angle
+    #
+    # January 1 starts at 12 o'clock.
+    # Decreasing angle produces clockwise movement.
     # --------------------------------------------------------
 
     daily$angle_start <-
+      pi / 2 -
       2 *
       pi *
       (
@@ -751,6 +753,7 @@ StatTSSpiral <- ggplot2::ggproto(
       365
 
     daily$angle_end <-
+      pi / 2 -
       2 *
       pi *
       daily$spiral_day /
@@ -758,15 +761,11 @@ StatTSSpiral <- ggplot2::ggproto(
 
 
     # --------------------------------------------------------
-    # Save frequency as a column.
-    #
-    # This is preferable to using attributes because ggplot2
-    # may strip attributes from data frames.
+    # Save frequency
     # --------------------------------------------------------
 
     daily$tsspiral_frequency <-
       frequency
-
 
     daily
   }
@@ -801,18 +800,12 @@ GeomTSSpiral <- ggplot2::ggproto(
 
   draw_key = ggplot2::draw_key_polygon,
 
-
-  # ==========================================================
-  # Draw panel
-  # ==========================================================
-
   draw_panel = function(
     data,
     panel_params,
     coord,
     ring_spacing = 1,
     na.rm = FALSE) {
-
 
     # --------------------------------------------------------
     # Frequency
@@ -874,11 +867,6 @@ GeomTSSpiral <- ggplot2::ggproto(
       radius +
       ring_width / 2
 
-
-    # --------------------------------------------------------
-    # Scale radius to panel
-    # --------------------------------------------------------
-
     max_radius <-
       max(
         outer_radius,
@@ -906,15 +894,23 @@ GeomTSSpiral <- ggplot2::ggproto(
       seq_len(nrow(data)),
       function(i) {
 
-        # Missing values create gaps.
+        # ----------------------------------------------------
+        # Missing observations create gaps
+        # ----------------------------------------------------
+
         if (
           is.na(data$fill[i]) ||
           is.na(data$angle_start[i]) ||
           is.na(data$angle_end[i])
         ) {
+
           return(NULL)
         }
 
+
+        # ----------------------------------------------------
+        # Angular boundaries
+        # ----------------------------------------------------
 
         angles <- seq(
           data$angle_start[i],
@@ -923,7 +919,10 @@ GeomTSSpiral <- ggplot2::ggproto(
         )
 
 
-        # Outer arc
+        # ----------------------------------------------------
+        # Outer boundary
+        # ----------------------------------------------------
+
         outer_x <-
           0.5 +
           outer_radius[i] *
@@ -935,7 +934,10 @@ GeomTSSpiral <- ggplot2::ggproto(
           sin(angles)
 
 
-        # Inner arc
+        # ----------------------------------------------------
+        # Inner boundary
+        # ----------------------------------------------------
+
         inner_x <-
           0.5 +
           inner_radius[i] *
@@ -950,6 +952,10 @@ GeomTSSpiral <- ggplot2::ggproto(
             rev(angles)
           )
 
+
+        # ----------------------------------------------------
+        # Polygon
+        # ----------------------------------------------------
 
         grid::polygonGrob(
           x = c(
@@ -978,7 +984,10 @@ GeomTSSpiral <- ggplot2::ggproto(
     )
 
 
-    # Remove NULL grobs.
+    # --------------------------------------------------------
+    # Remove NULL grobs
+    # --------------------------------------------------------
+
     spiral_grobs <-
       Filter(
         Negate(is.null),
@@ -998,7 +1007,6 @@ GeomTSSpiral <- ggplot2::ggproto(
           i *
           ring_spacing *
           scale_radius
-
 
         grid::textGrob(
           label = years[i],
@@ -1031,7 +1039,6 @@ GeomTSSpiral <- ggplot2::ggproto(
         frequency
       )
 
-
     calendar_grobs <- list()
 
 
@@ -1040,10 +1047,13 @@ GeomTSSpiral <- ggplot2::ggproto(
     ) {
 
       # ------------------------------------------------------
-      # Angular position
+      # Clockwise calendar angles
+      #
+      # January 1 starts at 12 o'clock.
       # ------------------------------------------------------
 
       calendar_labels$angle <-
+        pi / 2 -
         2 *
         pi *
         (
@@ -1053,7 +1063,7 @@ GeomTSSpiral <- ggplot2::ggproto(
 
 
       # ------------------------------------------------------
-      # Radius of outermost ring
+      # Outer ring
       # ------------------------------------------------------
 
       outer_year <-
@@ -1064,15 +1074,13 @@ GeomTSSpiral <- ggplot2::ggproto(
         ring_spacing *
         scale_radius
 
-
-      # Place labels outside the outer ring.
       label_r <-
         outer_r +
         0.055
 
 
       # ------------------------------------------------------
-      # Generate labels
+      # Calendar text grobs
       # ------------------------------------------------------
 
       calendar_grobs <- lapply(
@@ -1085,11 +1093,14 @@ GeomTSSpiral <- ggplot2::ggproto(
             calendar_labels$angle[i]
 
 
+          # --------------------------------------------------
+          # Position
+          # --------------------------------------------------
+
           x <-
             0.5 +
             label_r *
             cos(angle)
-
 
           y <-
             0.5 +
@@ -1097,7 +1108,10 @@ GeomTSSpiral <- ggplot2::ggproto(
             sin(angle)
 
 
-          # Tangential rotation.
+          # --------------------------------------------------
+          # Tangential text rotation
+          # --------------------------------------------------
+
           rotation <-
             angle *
             180 /
@@ -1105,7 +1119,7 @@ GeomTSSpiral <- ggplot2::ggproto(
             90
 
 
-          # Keep labels upright.
+          # Keep labels readable
           if (
             rotation > 90 &&
             rotation < 270
@@ -1120,21 +1134,16 @@ GeomTSSpiral <- ggplot2::ggproto(
           grid::textGrob(
             label =
               calendar_labels$label[i],
-
             x = grid::unit(
               x,
               "npc"
             ),
-
             y = grid::unit(
               y,
               "npc"
             ),
-
             rot = rotation,
-
             just = "centre",
-
             gp = grid::gpar(
               fontsize = 7
             )
@@ -1148,20 +1157,12 @@ GeomTSSpiral <- ggplot2::ggproto(
     # Combine grobs
     # ========================================================
 
-    # IMPORTANT:
-    # Each object below is already a list of grobs.
-    # We combine the lists first, rather than passing the lists
-    # themselves to grid::gList().
-    # ========================================================
-
     all_grobs <- c(
       spiral_grobs,
       year_grobs,
       calendar_grobs
     )
 
-
-    # Remove any remaining NULL objects.
     all_grobs <-
       Filter(
         Negate(is.null),
@@ -1169,7 +1170,10 @@ GeomTSSpiral <- ggplot2::ggproto(
       )
 
 
-    # Create one grob tree.
+    # Important:
+    # gList() must receive individual grobs, not lists.
+    # ========================================================
+
     grid::grobTree(
       children =
         do.call(
