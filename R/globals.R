@@ -7,5 +7,12 @@ utils::globalVariables(c(
   "theta_width",
   "x",
   "y",
-  "id"
+  "id",
+  "%m+%",
+  "years",
+  "angle",
+  "radius",
+  "width",
+  "level",
+  "period_start"
 ))

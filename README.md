@@ -415,3 +415,28 @@ calendar_hourly_polar(
 ```
 
 <img src="man/figures/README-unnamed-chunk-11-2.png" alt="" width="100%" />
+
+## Temporal Hierachy
+
+``` r
+set.seed(123)
+
+dat <- data.frame(
+  date = seq.Date(
+    from = as.Date("2020-01-01"),
+    to = as.Date("2023-12-31"),
+    by = "day" ))
+
+dat$value <- 20 +
+  5 * sin(
+    2 * pi * lubridate::yday(dat$date) / 365.25
+  ) +
+   rnorm(nrow(dat), 0, 1)
+
+temporal_hierarchical(
+ data = dat,
+ date = date,
+ value = value)
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" alt="" width="100%" />
