@@ -24,8 +24,18 @@
 #' @return A ggplot2 layer.
 #'
 #' @examples
-#'
 #' library(ggplot2)
+#'
+#' set.seed(123)
+#'
+#' dat <- data.frame(
+#'   date = seq.Date(
+#'     as.Date("2021-01-01"),
+#'     as.Date("2023-12-31"),
+#'     by = "day"
+#'   ),
+#'   value = rnorm(1095)
+#' )
 #'
 #' ggplot(
 #'   dat,

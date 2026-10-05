@@ -6,7 +6,8 @@ Authors@R:
       "Thiyanga S.",
       "Talagala",
       email = "ttalagala@sjp.ac.lk",
-      role = c("aut", "cre")
+      role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0002-0656-9789")
     )
 Description: Provides a grammar of graphics geometry for visualising time series using spiral layouts, with each year represented as a separate ring.
 License: GPL (>= 3)

@@ -55,31 +55,17 @@
 #'
 #' set.seed(123)
 #'
-#' dat <- data.frame(
+#' df <- data.frame(
 #'   date = seq.Date(
 #'     as.Date("2020-01-01"),
 #'     as.Date("2023-12-31"),
 #'     by = "day"
 #'   )
 #' )
-#'
-#' # Remove some observations
-#' dat <- dat[
-#'   !(
-#'     dat$date >= as.Date("2020-03-01") &
-#'       dat$date <= as.Date("2020-03-20")
-#'   ),
-#' ]
-#'
-#' dat <- dat[
-#'   !(
-#'     dat$date >= as.Date("2021-07-10") &
-#'       dat$date <= as.Date("2021-08-05")
-#'   ),
-#' ]
+#' df$date[1:10] <- NA
 #'
 #' ggplot(
-#'   dat,
+#'   df,
 #'   aes(x = date)
 #' ) +
 #'   geom_tsspiralmiss(

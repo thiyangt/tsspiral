@@ -45,9 +45,18 @@ bar represents the magnitude of the time-series value.
 January 1 starts at 12 o'clock and the spiral proceeds clockwise.
 }
 \examples{
-\dontrun{
-
 library(ggplot2)
+
+set.seed(123)
+
+dat <- data.frame(
+  date = seq.Date(
+    as.Date("2021-01-01"),
+    as.Date("2023-12-31"),
+    by = "day"
+  ),
+  value = rnorm(1095)
+)
 
 ggplot(
   dat,
@@ -63,6 +72,5 @@ ggplot(
   scale_fill_viridis_c() +
   theme_void()
 
-}
 
 }
