@@ -100,12 +100,8 @@ than appearing as a thin radial slice.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-
 library(ggplot2)
-library(viridis)
-
-# Daily data
+#' # daily data
 dat <- data.frame(
   date = seq.Date(
     as.Date("2020-01-01"),
@@ -113,7 +109,6 @@ dat <- data.frame(
     by = "day"
   )
 )
-
 dat$value <- sin(
   2 * pi * as.numeric(format(dat$date, "%j")) / 365
 ) + rnorm(nrow(dat), sd = 0.2)
@@ -127,8 +122,7 @@ ggplot(
   )
 ) +
   geom_tsspiral(ring_spacing = 2) +
-  scale_fill_viridis_c() +
   theme_void()
 
-} # }
+
 ```
