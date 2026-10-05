@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# tsspiral
+# tsspiral <img src="data-raw/hex.png" align="right" height="400"/>
 
 <!-- badges: start -->
 
