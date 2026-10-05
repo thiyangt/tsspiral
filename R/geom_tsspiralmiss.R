@@ -50,7 +50,6 @@
 #' shifted by one day.
 #'
 #' @examples
-#' \dontrun{
 #'
 #' library(ggplot2)
 #'
@@ -88,7 +87,6 @@
 #'   ) +
 #'   theme_void()
 #'
-#' }
 #'
 #' @export
 geom_tsspiralmiss <- function(

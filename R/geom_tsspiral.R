@@ -67,8 +67,6 @@
 #' that month rather than appearing as a thin radial slice.
 #'
 #' @examples
-#' \dontrun{
-#'
 #' library(ggplot2)
 #' library(viridis)
 #'
@@ -97,7 +95,6 @@
 #'   scale_fill_viridis_c() +
 #'   theme_void()
 #'
-#' }
 #'
 #' @export
 geom_tsspiral <- function(

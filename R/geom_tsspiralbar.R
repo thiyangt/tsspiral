@@ -24,7 +24,6 @@
 #' @return A ggplot2 layer.
 #'
 #' @examples
-#' \dontrun{
 #'
 #' library(ggplot2)
 #'
@@ -42,7 +41,6 @@
 #'   scale_fill_viridis_c() +
 #'   theme_void()
 #'
-#' }
 #'
 #' @export
 geom_tsspiralbar <- function(
