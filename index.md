@@ -1,4 +1,4 @@
-# tsspiral
+# tsspiral ![](data-raw/hex.png)
 
 The goal of tsspiral is to create spiral version of time series plots.
 
