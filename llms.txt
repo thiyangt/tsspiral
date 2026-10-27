@@ -461,4 +461,6 @@ temporal_hierarchical(
   : Spiral Missingness Geometry
 - [`temporal_hierarchical()`](https://thiyangt.github.io/tsspiral/reference/temporal_hierarchical.md)
   : Aligned Temporal Hierarchical Spiral Plot
+- [`tourism.srilanka`](https://thiyangt.github.io/tsspiral/reference/tourism.srilanka.md)
+  : Sri Lanka Tourism Time Series
 
