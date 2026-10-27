@@ -1,6 +1,6 @@
 Package: tsspiral
 Title: Spiral Visualisation for Time Series
-Version: 0.1.1
+Version: 0.1.2
 Authors@R:
     person(
       "Thiyanga S.",
@@ -30,3 +30,4 @@ Suggests:
     testthat (>= 3.0.0),
     tsibble
 Config/testthat/edition: 3
+LazyData: true

@@ -11,3 +11,14 @@ usethis::use_package("rlang")
 usethis::use_pkgdown_github_pages()
 # Preview your site locally before publishing
 pkgdown::build_site()
+
+
+# Reading tourism dataset
+library(tidyverse)
+library(here)
+library(readxl)
+
+tourism.srilanka <- read_excel("data-raw/Tourismdata.xlsx")
+View(tourism.srilanka)
+usethis::use_data(tourism.srilanka, overwrite = TRUE)
+colnames(tourism.srilanka)
