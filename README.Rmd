@@ -26,7 +26,7 @@ You can install the development version of tsspiral from [GitHub](https://github
 
 ``` r
 # install.packages("pak")
-pak::pak("thiyangt/tsspiralplot")
+pak::pak("thiyangt/tsspiral")
 ```
 
 ## Applications
