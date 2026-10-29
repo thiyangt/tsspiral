@@ -10,7 +10,7 @@ You can install the development version of tsspiral from
 ``` r
 
 # install.packages("pak")
-pak::pak("thiyangt/tsspiralplot")
+pak::pak("thiyangt/tsspiral")
 ```
 
 ## Applications
